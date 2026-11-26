@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kuis Tentamen Fisiologi 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f6ff;--card:#fff;--ink:#1b2150;--mut:#5b6190;--pri:#3d4bff;--ok:#12b886;--mid:#f5a524;--bad:#f0476a;--line:#dde2ff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12142b;--card:#1d2146;--ink:#eef0ff;--mut:#a3a9d9;--pri:#8a94ff;--line:#2e3470}}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Fredoka','Trebuchet MS',system-ui,sans-serif;line-height:1.45}
+main{max-width:640px;margin:0 auto;padding:18px 16px 40px}
+h1{font-size:28px;margin:8px 0 4px}p.sub{margin:0 0 16px;color:var(--mut)}
+.card{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:18px;margin-bottom:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.chip{border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 14px;font:inherit;font-weight:600;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--pri);border-color:var(--pri);color:#fff}
+button.big{width:100%;border:0;border-radius:16px;padding:14px;font:inherit;font-weight:700;font-size:18px;background:var(--pri);color:#fff;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.25)}
+button.big:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.25)}
+button:focus-visible,textarea:focus-visible{outline:3px solid var(--mid);outline-offset:2px}
+.top{display:flex;justify-content:space-between;align-items:center;font-weight:600;margin-bottom:8px}
+.bar{height:12px;background:var(--line);border-radius:9px;overflow:hidden;margin-bottom:14px}.bar i{display:block;height:100%;width:0;background:var(--ok);transition:width .3s}
+.tag{display:inline-block;font-size:13px;font-weight:600;color:var(--pri);margin-bottom:6px}
+.q{font-size:21px;font-weight:600;margin:0 0 12px}
+textarea{width:100%;min-height:84px;border:2px solid var(--line);border-radius:14px;padding:12px;font:inherit;background:var(--bg);color:var(--ink);resize:vertical}
+.ans{margin-top:12px;padding:14px;border-radius:14px;background:rgba(18,184,134,.14);border:2px solid var(--ok)}
+.rate{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.rate button{border:0;border-radius:14px;padding:12px 4px;font:inherit;font-weight:700;color:#fff;cursor:pointer}
+.r2{background:var(--ok)}.r1{background:var(--mid)}.r0{background:var(--bad)}
+.pop{animation:pop .35s}@keyframes pop{50%{transform:scale(1.08)}}
+@media (prefers-reduced-motion:reduce){.pop{animation:none}.bar i{transition:none}}
+.big-score{font-size:54px;font-weight:700;text-align:center;margin:6px 0}
+.row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line)}
+.hide{display:none}
+</style></head><body><main>
+<div id="home">
+  <h1>Kuis Tentamen Fisiologi 🧠</h1>
+  <p class="sub">Jawab dulu di kepala atau ketik, lalu buka jawabannya dan nilai dirimu sendiri. Pilih bab yang mau dilatih.</p>
+  <div class="card"><b>Ketuk bab yang mau dilatih</b> <span style="color:var(--mut)">(kosong = semua bab)</span><div class="chips" id="chips"></div>
+    <label class="chip" style="display:inline-block"><input type="checkbox" id="shuf" checked> Acak urutan soal</label></div>
+  <button class="big" id="go">Mulai kuis</button>
+</div>
+<div id="play" class="hide">
+  <div class="top"><span id="cnt"></span><span id="streak"></span></div>
+  <div class="bar"><i id="bar"></i></div>
+  <div class="card" id="qc"><span class="tag" id="tag"></span><p class="q" id="q"></p>
+    <textarea id="inp" placeholder="Tulis jawabanmu di sini (boleh dikosongkan)"></textarea>
+    <button class="big" id="show" style="margin-top:12px">Lihat jawaban</button>
+    <div id="rev" class="hide"><div class="ans" id="a"></div>
+      <div style="margin-top:10px;font-weight:600">Seberapa benar jawabanmu?</div>
+      <div class="rate"><button class="r2" data-s="2">Benar 🎉</button><button class="r1" data-s="1">Setengah</button><button class="r0" data-s="0">Salah</button></div></div>
+  </div>
+</div>
+<div id="end" class="hide">
+  <div class="card"><div class="big-score" id="sc"></div><p id="msg" style="text-align:center;margin:0 0 10px"></p><div id="rows"></div></div>
+  <button class="big" id="again" style="margin-bottom:10px">Ulangi soal yang belum benar</button>
+  <button class="big" id="home2" style="background:var(--ink);color:var(--bg)">Kembali ke menu</button>
+</div>
+</main>
+<script>
+var B=['Transpor membran','Jantung','EKG','Biolistrik','Spirometri / Respirasi','Otot (Muskulo)'];
+var D=[
+[0,'Sebutkan 2 jenis kontrol homeostasis berdasarkan sumber pengendalian dan jelaskan.','Intrinsik: respons kompensatorik inheren organ. Ekstrinsik: dipicu faktor di luar organ (saraf dan endokrin).'],
+[0,'Sebutkan 3 mekanisme pengaturan homeostasis dan jelaskan.','Negative feedback: melawan perubahan, kembali ke setpoint. Positive feedback: memperbesar perubahan sampai dihentikan faktor luar. Adaptif: saraf mengoreksi tindakan feedforward.'],
+[0,'Apa sifat kepala dan ekor fosfolipid?','Kepala: bermuatan negatif, polar, hidrofilik. Ekor: tidak bermuatan, nonpolar, hidrofobik.'],
+[0,'Apa fungsi karbohidrat membran?','Pengenalan diri dan interaksi sel; pertumbuhan jaringan (sel tidak tumbuh melampaui wilayahnya).'],
+[0,'Sebutkan fungsi protein integral dan protein perifer.','Integral: kanal (bocor/berpintu), pembawa, CAM. Perifer: akseptor penambat eksositosis, enzim terikat membran, reseptor.'],
+[0,'Apa fungsi CAM dan sebutkan 2 contohnya?','Membantu sel melekat ke sel lain/jaringan ikat. Kaderin (mengunci sel seperti ritsleting), integrin (menghubungkan luar sel dengan sitoskeleton).'],
+[0,'Sebutkan 3 protein dalam gel ECM dan fungsinya.','Kolagen: kekuatan tensil. Elastin: meregang dan kembali (paru). Fibronektin: perlekatan dan fiksasi sel.'],
+[0,'Sebutkan 2 komponen desmosom, protein taut erat, dan protein taut celah.','Desmosom: plak + filamen glikoprotein berkaderin. Taut erat: klaudin (kiss site). Taut celah: konekson.'],
+[0,'Apa yang berpindah pada difusi sederhana, difusi terfasilitasi, osmosis? Apa beda sederhana vs terfasilitasi?','Zat terlarut, zat terlarut, air. Terfasilitasi: pakai protein pembawa, spesifik, bisa jenuh (Tm), berkompetisi. Keduanya tanpa ATP.'],
+[0,'Hukum Fick: laju difusi sebanding dengan apa dan berbanding terbalik dengan apa?','Sebanding dengan D, A, dan ΔC; berbanding terbalik dengan jarak/ketebalan (Δx). J = D × A × (ΔC/Δx).'],
+[0,'Apa itu osmosis dan apa bedanya dengan difusi?','Difusi air melewati membran selektif permeabel dari konsentrasi air tinggi ke rendah. Difusi memindahkan zat terlarut dan membran tidak harus ada.'],
+[0,'Bedakan tekanan hidrostatik dan tekanan osmotik.','Hidrostatik: gaya cairan pada dinding (tekanan darah), menahan air masuk. Osmotik: kecenderungan air ke larutan lebih pekat, menarik air. Keduanya saling melawan.'],
+[0,'Nasib eritrosit di larutan isotonik, hipotonik, hipertonik? Mengapa?','Isotonik: normal (air seimbang). Hipotonik: air masuk, membengkak, lisis. Hipertonik: air keluar, mengerut, krenasi.'],
+[0,'Bedakan transpor aktif primer dan sekunder, beri contoh.','Primer: ATP langsung (pompa Na+-K+ ATPase, 3 Na+ keluar 2 K+ masuk). Sekunder: energi dari gradien; antiport (berlawanan arah, Na+-Ca2+) dan symport (searah, SGLT).'],
+[0,'Apa yang ditelan pada fagositosis, pinositosis, dan endositosis diperantarai reseptor?','Partikel padat besar (makrofag menelan bakteri); cairan ekstrasel (tidak selektif); zat spesifik berikatan reseptor (LDL, transferin).'],
+[0,'Organel yang paling berperan pada eksositosis? Sebutkan faktor permeabilitas membran.','Badan Golgi (membentuk vesikel). Faktor: polaritas serta ukuran dan konsentrasi.'],
+[1,'Sebutkan 3 komponen utama sistem sirkulasi.','Jantung (pompa), pembuluh darah (saluran), darah (medium pengangkut).'],
+[1,'Sebutkan 3 lapisan dinding jantung dan apa itu perikarditis.','Endotel, miokardium, epikardium. Perikarditis: radang kantung perikardium, bising gesek, nyeri.'],
+[1,'Berapa rata-rata VDA, VSA, dan isi sekuncup?','VDA 135 mL, VSA 65 mL, isi sekuncup 70 mL.'],
+[1,'Berapa persen darah masuk ventrikel secara pasif dan dari kontraksi atrium?','70-80% pasif; 20-30% dari kontraksi atrium.'],
+[1,'Jelaskan kontraksi isovolumetrik dan ejeksi ventrikel.','Isovolumetrik: katup AV dan aorta tertutup, volume tetap, tekanan naik. Ejeksi: tekanan ventrikel > aorta; puncak kiri 120, kanan 25 mmHg.'],
+[1,'Bedakan bunyi jantung 1 dan 2.','BJ1: katup AV menutup, awal sistol, ICS 5 midklavikula kiri (mitral), rendah dan lama. BJ2: semilunar menutup, ICS 2 parasternal, tinggi dan singkat.'],
+[1,'Kapan BJ3 dan BJ4 terjadi dan kapan fisiologis?','BJ3: awal diastol (rapid filling), apex dengan bell; fisiologis pada anak dan atlet. BJ4: akhir diastol (kontraksi atrium); fisiologis pada pria >50 tahun.'],
+[1,'Bedakan murmur mid-sistolik dan mid-diastolik.','Sistolik: antara BJ1-BJ2; regurgitasi AV atau stenosis semilunar. Diastolik: stenosis AV atau regurgitasi semilunar; apex dengan bell.'],
+[1,'Beda grade III dan IV murmur? Sebutkan 7 hal evaluasi murmur.','III: keras tanpa thrill; IV: dengan thrill. Intensitas, timing, lokasi, kualitas, pitch, radiasi, konfigurasi.'],
+[1,'Rumus curah jantung. Hitung bila HR 80 dan isi sekuncup 60 ml.','CJ = kecepatan jantung × isi sekuncup = 4800 ml/menit (4,8 L/menit).'],
+[2,'Urutan sistem konduksi dan laju SA, AV, Purkinje.','Nodus SA, nodus AV, berkas His, serat Purkinje. Laju 70-80, ±50, ±30 per menit.'],
+[2,'Apa itu potensial pemacu dan mekanisme ionnya? Fungsi kanal funny?','Pergeseran lambat potensial ke ambang: Na+ masuk naik, K+ keluar turun, Ca2+ masuk naik. Funny: Na+ masuk saat membran lebih negatif.'],
+[2,'Berapa lama keterlambatan di nodus AV dan fungsinya?','±100 mdet; atrium berkontraksi dan mengosongkan isi dulu; tampak sebagai segmen PR.'],
+[2,'Jelaskan fase plateau dan periode refrakter jantung.','Ca2+ tipe L masuk diimbangi turunnya permeabilitas K+. Refrakter ±250 mdet sehingga tidak bisa tetanus.'],
+[2,'Letak elektroda V1, V4, V6 dan jenis sadapan I-III vs aVR/aVL/aVF?','V1: sela iga IV kanan sternum. V4: sela iga V midklavikula kiri. V6: setinggi V4, midaksila. I-III bipolar; aV unipolar.'],
+[2,'Apa arti P, QRS, T dan segmen PR, ST, TP?','P: depolarisasi atrium. QRS: depolarisasi ventrikel. T: repolarisasi ventrikel. PR: jeda AV. ST: plateau. TP: istirahat dan pengisian.'],
+[2,'Batas takikardia/bradikardia, ciri atrial flutter, dan mengapa VF lebih serius?','>100 dan <60 per menit. Flutter: atrium 200-380/menit reguler, ventrikel 2:1 atau 3:1. VF: kontraksi kacau, tidak efektif memompa.'],
+[2,'Sebutkan 3 tipe blokade konduksi dan AV block derajat 1, 2, 3.','Sinus node, AV, bundle branch. D1: PR >0,2 s. Wenckebach: PR makin panjang hingga QRS hilang. Mobitz II: tiap P ketiga tanpa QRS. D3: blok total.'],
+[2,'Bedakan iskemia miokardium dan infark miokardium akut.','Iskemia: kurang darah beroksigen. Infark: nekrosis sel akibat sumbatan/pecah pembuluh; enzim khas keluar ke darah.'],
+[2,'Defleksi QRS di I, II, aVF pada aksis normal, deviasi kanan, deviasi kiri?','Normal: +,+,+. Kanan: −,+,+. Kiri: +,−,−.'],
+[3,'Sebutkan 4 zona neuron.','Masukan (dendrit dan soma), pemicu (axon hillock), penghantar (akson), keluaran (terminal akson).'],
+[3,'Apa itu depolarisasi, repolarisasi, hiperpolarisasi (istirahat -70 mV)?','Depolarisasi: kurang negatif. Repolarisasi: kembali ke istirahat. Hiperpolarisasi: lebih negatif dari istirahat.'],
+[3,'Apa itu kanal bocor dan 4 kanal berpintu?','Bocor: terbuka saat istirahat. Berpintu: listrik, kimiawi, mekanis, termal.'],
+[3,'Beda potensial berjenjang dan potensial aksi? Bagaimana kekuatan stimulus disandi?','Berjenjang: amplitudo bervariasi, melemah, bisa dijumlahkan. Aksi: semua-atau-tidak. Kekuatan stimulus disandi lewat frekuensi impuls.'],
+[3,'Jelaskan urutan potensial aksi.','Na+ masuk (fase naik), inaktivasi Na+, K+ keluar (fase turun), K+ masih keluar (undershoot).'],
+[3,'Sebutkan 3 keadaan kanal Na+.','Siap membuka: aktivasi tertutup, inaktivasi terbuka. Aktif: keduanya terbuka. Inaktif: aktivasi terbuka, inaktivasi tertutup.'],
+[3,'Bedakan refraktor absolut dan relatif.','Absolut: tidak bisa impuls baru (Na+ belum bisa aktif ulang). Relatif: perlu rangsangan lebih kuat.'],
+[3,'Apa itu konduksi saltatori dan pengaruh mielin serta diameter?','Regenerasi di nodus Ranvier. Mielin mengurangi kebocoran arus; diameter besar menurunkan resistensi, hantaran makin cepat.'],
+[3,'Urutkan peran Ca2+ di sinaps kimia.','Depolarisasi prasinaps, kanal Ca2+ buka, Ca2+ masuk, eksositosis neurotransmiter, reseptor pascasinaps ubah permeabilitas.'],
+[3,'Bedakan EPSP dan IPSP, beserta neurotransmiternya.','EPSP: kanal kation, influks Na+, depolarisasi; glutamat/ACh. IPSP: efluks K+ atau influks Cl-, hiperpolarisasi; GABA/glisin.'],
+[3,'Apa itu sumasi temporal dan spasial?','Temporal: masukan sama berulang sebelum respons berakhir. Spasial: beberapa masukan aktif hampir bersamaan.'],
+[4,'Apa itu pori Kohn dan ventilasi kolateral?','Pori halus di dinding antar alveolus; ventilasi kolateral: aliran udara antar alveolus lewat pori itu.'],
+[4,'Dinding apa satu-satunya yang berotot di paru?','Otot polos di dinding arteriol dan bronkiolus; dinding alveolus tidak berotot.'],
+[4,'Jelaskan sel alveolus tipe I dan II serta tebal membran alveolus-kapiler.','Tipe I: gepeng pembentuk dinding. Tipe II: 5% permukaan, sekresi surfaktan. Tebal membran 0,5 mikrometer.'],
+[4,'Apa rumus RQ dan nilainya untuk karbohidrat, lemak, protein?','RQ = CO2 dihasilkan / O2 dikonsumsi. Karbohidrat 1, lemak 0,7, protein 0,8.'],
+[4,'Apa itu pompa respirasi?','Tekanan dada ±5 mmHg di bawah atmosfer memeras darah dari vena bawah ke vena dada, meningkatkan aliran balik vena.'],
+[4,'Berapa PO2 atmosfer dan berapa persen O2 larut vs terikat Hb?','160 mmHg. O2 larut 1,5%, terikat Hb 98,5%.'],
+[4,'Tulis reaksi hemoglobin tereduksi dengan O2 dan persentase transpor CO2.','Deoksihemoglobin + O2 ⇌ oksihemoglobin. CO2: larut 10%, karbamino-Hb 30%, bikarbonat 60%.'],
+[4,'Bedakan efek Bohr dan efek Haldane.','Bohr: CO2 dan H+ naik, pelepasan O2 dari Hb naik. Haldane: pelepasan O2 membuat Hb tereduksi menyerap lebih banyak CO2 dan H+.'],
+[4,'Define tidal volume, residual volume, IRV, ERV (with normal values).','Tidal: udara tiap napas tenang (500 mL). Residual: sisa udara setelah ekspirasi maksimal (1200). IRV: inspirasi paksa tambahan (3000). ERV: ekspirasi paksa tambahan (1000).'],
+[4,'Tuliskan rumus KV, KI, KRF, KPT.','KV = VCI + VT + VCE. KI = VCI + VT. KRF = VCE + VR. KPT = KI + KRF.'],
+[4,'Hitung ventilasi paru (VT 500, 12x/menit) dan ventilasi alveolus. Berapa ruang mati anatomik?','6000 mL/menit. Alveolus = (VT − ruang mati) × laju napas = 4200 mL/menit. Ruang mati 150 mL.'],
+[4,'Bedakan pusat pneumotaksik dan apneustik.','Di pons. Pneumotaksik membatasi inspirasi (dominan). Apneustik mencegah neuron inspirasi padam; tanpa rem pneumotaksik terjadi apneusis.'],
+[4,'Sebutkan 3 penyakit PPOK.','Bronkitis kronik, asma, emfisema.'],
+[5,'Bagaimana pita A, pita I, zona H, sarkomer berubah saat kontraksi?','Pita A tetap; pita I, zona H, dan sarkomer memendek. Filamen tebal dan tipis tidak memendek.'],
+[5,'Apa itu titin dan fungsinya?','Protein terbesar tubuh (±30.000 asam amino): perancah filamen tebal, pegas elastik, ikut transduksi sinyal.'],
+[5,'Sebutkan subunit miosin dan 3 subunit troponin.','Miosin 2 subunit (stik golf). Troponin: mengikat tropomiosin, aktin, dan Ca2+.'],
+[5,'Urutan penggabungan eksitasi-kontraksi.','ACh, potensial aksi sarkolema, tubulus T, reseptor dihidropiridin, reseptor rianodin buka (Ca2+ keluar), Ca2+ ikat troponin, jembatan silang.'],
+[5,'Bagaimana relaksasi otot rangka terjadi?','Asetilkolinesterase hapus ACh; pompa Ca2+-ATPase kembalikan Ca2+; troponin-tropomiosin tutup aktin.'],
+[5,'Berapa lama potensial aksi, periode laten, dan satu kedutan?','1-2 mdet; beberapa mdet; 30-100 mdet.'],
+[5,'Sebutkan 4 tahap siklus jembatan silang dan arti asinkron.','Berenergi, pengikatan, kayuhan kuat (45°), pelepasan (ATP baru). Asinkron: sebagian menahan, sebagian melepas.'],
+[5,'Jelaskan rigor mortis.','Mulai 3-4 jam, sempurna ±12 jam; tanpa ATP baru miosin tidak lepas dari aktin; hilang beberapa hari.'],
+[5,'Bedakan isotonik, isometrik, isokinetik; konsentrik vs eksentrik.','Isotonik: beban tetap, panjang berubah. Isometrik: panjang tetap. Isokinetik: kecepatan tetap. Konsentrik: memendek; eksentrik: memanjang sambil berkontraksi.'],
+[5,'Lengan daya 5 cm, lengan beban 30 cm, beban 4 kg. Berapa gaya otot?','F × 5 = 4 × 30, F = 24 kg (rasio 1:6).'],
+[5,'Apa itu unit motorik, ukuran unit besar, dan kekuatan tetanus?','1 neuron motorik + seratnya; unit besar 1500-2000 serat; tetanus 3-4x lebih kuat dari kedutan.'],
+[5,'Urutkan sumber ATP otot dan jumlah ATP-nya.','Kreatin fosfat (tercepat, 1 ATP), glikolisis anaerob (2 ATP), fosforilasi oksidatif (32 ATP).'],
+[5,'Penyebab kelelahan dan apa itu EPOC?','Otot: Pi menumpuk, glikogen habis; SSP menghentikan neuron motorik. EPOC: O2 untuk memulihkan kreatin fosfat, buang laktat, isi glikogen; akibat epinefrin dan suhu tinggi.'],
+[5,'Tipe serat mana yang dapat berubah? Apa itu atrofi dan distrofi Duchenne?','IIa dan IIx berubah; tipe I tetap. Atrofi: sarcopenia/tidak digunakan. Duchenne: defisiensi distrofin, Ca2+ masuk, protease merusak serat.'],
+[5,'Siapa mengatur refleks, gerakan halus, postur? Beda gelondong otot dan organ tendon Golgi?','Refleks: neuron aferen; gerakan halus: piramidal; postur: ekstrapiramidal. Gelondong: panjang dan kecepatan regang (γ); Golgi: tegangan di tendon.'],
+[5,'Bandingkan otot rangka, polos, jantung. Apa itu sinsitium fungsional dan relaksasi stres?','Rangka: troponin, neurogenik. Polos: kalmodulin-MLCK, tanpa sarkomer. Jantung: troponin, miogenik. Sinsitium: unit tunggal lewat taut celah. Relaksasi stres: tegangan cepat kembali setelah diregang (kandung kemih).']
+];
+var $=function(i){return document.getElementById(i)},sel={},deck=[],i=0,sc=0,st=0,res=[],tot=0;
+B.forEach(function(n,k){sel[k]=false;var c=document.createElement('button');c.className='chip';c.setAttribute('aria-pressed','false');c.textContent=n;c.onclick=function(){sel[k]=!sel[k];c.setAttribute('aria-pressed',sel[k])};$('chips').appendChild(c)});
+function show(id){['home','play','end'].forEach(function(x){$(x).classList.toggle('hide',x!==id)});window.scrollTo(0,0)}
+function start(list){deck=list;if($('shuf').checked)deck=deck.slice().sort(function(){return Math.random()-.5});i=0;sc=0;st=0;res=[];tot=deck.length;show('play');ask()}
+$('go').onclick=function(){var any=Object.keys(sel).some(function(k){return sel[k]});var l=D.filter(function(d){return !any||sel[d[0]]});start(l)};
+function ask(){var d=deck[i];$('cnt').textContent='Soal '+(i+1)+' dari '+deck.length;$('streak').textContent=st>1?'🔥 '+st+' beruntun':'';$('bar').style.width=(i/deck.length*100)+'%';$('tag').textContent=B[d[0]];$('q').textContent=d[1];$('inp').value='';$('a').textContent=d[2];$('rev').classList.add('hide');$('show').classList.remove('hide')}
+$('show').onclick=function(){$('rev').classList.remove('hide');$('show').classList.add('hide');$('rev').scrollIntoView({behavior:'smooth',block:'nearest'})};
+document.querySelectorAll('.rate button').forEach(function(b){b.onclick=function(){var s=+b.dataset.s;sc+=s;st=s===2?st+1:0;res.push([deck[i],s]);if(s===2){$('qc').classList.remove('pop');void $('qc').offsetWidth;$('qc').classList.add('pop')}i++;i<deck.length?ask():fin()}});
+function fin(){$('bar').style.width='100%';var p=Math.round(sc/(tot*2)*100);$('sc').textContent=p+'%';$('msg').textContent=p>=80?'Mantap, tinggal dijaga!':p>=50?'Sudah lumayan, ulangi yang belum benar.':'Tenang, ulangi pelan-pelan, pasti naik.';var h='';B.forEach(function(n,k){var r=res.filter(function(x){return x[0][0]===k});if(!r.length)return;var ok=r.filter(function(x){return x[1]===2}).length;h+='<div class="row"><span>'+n+'</span><b>'+ok+'/'+r.length+'</b></div>'});$('rows').innerHTML=h;var w=res.filter(function(x){return x[1]<2}).length;$('again').classList.toggle('hide',!w);show('end')}
+$('again').onclick=function(){start(res.filter(function(x){return x[1]<2}).map(function(x){return x[0]}))};
+$('home2').onclick=function(){show('home')};
+</script></body></html>
